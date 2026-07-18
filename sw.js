@@ -7,10 +7,10 @@ const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/offline.html'
+  './',
+  './index.html',
+  './manifest.json',
+  './offline.html'
 ];
 
 self.addEventListener('install', (event) => {
@@ -56,7 +56,7 @@ self.addEventListener('fetch', (event) => {
           return res;
         })
         .catch(() =>
-          caches.match(req).then((cached) => cached || caches.match('/index.html') || caches.match('/offline.html'))
+          caches.match(req).then((cached) => cached || caches.match('./index.html') || caches.match('./offline.html'))
         )
     );
     return;
@@ -99,8 +99,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: payload.body || '',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    icon: 'icons/icon-192.png',
+    badge: 'icons/icon-192.png',
     data: payload.data || {},
     vibrate: [80, 40, 80]
   };
@@ -109,7 +109,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const target = '/#notifications';
+  const target = './#notifications';
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
