@@ -2,7 +2,7 @@
 // Cross-browser safe: does NOT rely on Background Sync API (unsupported in Safari/iOS).
 // Actual write-replay is handled by the page via IndexedDB outbox + 'online' event (see app.js).
 
-const CACHE_VERSION = 'insydelive-v2.0.1';
+const CACHE_VERSION = 'insydelive-v2.0.2';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
