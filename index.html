@@ -201,7 +201,7 @@ textarea.input{resize:vertical;min-height:70px;}
 .toast.show{opacity:1;}
 
 /* ---------- Splash / logo mark ---------- */
-.mark{width:76px;height:76px;border-radius:22px;background:linear-gradient(135deg,var(--gold),var(--purple));display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:18px;}
+.mark{width:76px;height:76px;border-radius:22px;background:linear-gradient(135deg,#FFA000,#FF1493,#7B2FF7);display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:18px;}
 
 /* ---------- People grid ---------- */
 .people-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
@@ -390,7 +390,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible, select:focus-vi
   <!-- ============ WELCOME ============ -->
   <section class="screen active" id="screen-welcome">
     <div class="content center" style="justify-content:center;flex:1;">
-      <div class="mark onboard-fade" style="animation-delay:0s;">⚡</div>
+      <div class="mark onboard-fade" style="animation-delay:0s;"><svg viewBox="0 0 100 150" style="width:58%;height:58%;" xmlns="http://www.w3.org/2000/svg"><path d="M55,0 L15,75 L45,75 L35,140 L85,55 L50,55 Z" fill="#E0A415" stroke="#140B22" stroke-width="1.2" stroke-opacity="0.35" stroke-linejoin="round"/></svg></div>
       <h1 class="onboard-fade" style="animation-delay:.1s;">InsydeLive</h1>
       <p class="tagline onboard-fade" style="animation-delay:.2s;">The Nightlife Social App</p>
       <p class="onboard-fade" style="max-width:280px;margin-bottom:20px;animation-delay:.3s;">See who's inside. Connect in the moment, wherever the night takes you.</p>
@@ -670,6 +670,48 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible, select:focus-vi
         <div class="field"><label>Content type</label><select class="input" id="add-organizer-content-category"><option value="nightlife">Nightlife & Social</option><option value="faith">Faith & Religious</option></select></div>
         <h3 style="margin:10px 0 4px;font-size:15px;">Current organizers</h3>
         <div class="stack" id="admin-organizers-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN: ORGANIZER EDIT ============ -->
+  <section class="screen" id="screen-admin-organizer-edit">
+    <div class="topbar"><button class="icon-btn" onclick="go('admin-organizers')" aria-label="Back">←</button><span class="brand" id="admin-organizer-edit-title">Organizer</span><span style="width:38px;"></span></div>
+    <div class="content content--noNav">
+      <div class="stack">
+        <div class="field"><label>Display name</label><input class="input" id="ao-edit-display-name"></div>
+        <div class="field"><label>Category (optional)</label><input class="input" id="ao-edit-category" placeholder="Music, Faith, Comedy, Talks..."></div>
+        <div class="field"><label>Content type</label><select class="input" id="ao-edit-content-category"><option value="nightlife">Nightlife & Social</option><option value="faith">Faith & Religious</option></select></div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <div class="pref-label">Active</div>
+            <div class="pref-desc">Paused organizers are hidden from Explore and Live events</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="ao-edit-active"><span class="track"><span class="thumb"></span></span></label>
+        </div>
+        <button class="btn btn-primary" onclick="saveAdminOrganizerEdit()">Save</button>
+
+        <div class="card stack" id="organizer-team-section" style="display:none;">
+          <h3 style="margin:0;font-size:15px;">Organizer team access</h3>
+          <p class="small">Let someone log in and manage this organizer's events and details.</p>
+          <div class="field"><label>Add by username</label>
+            <input class="input" id="add-organizer-team-username" placeholder="Start typing a username..." autocomplete="off" oninput="searchOrganizerTeamCandidate()">
+            <div class="stack" id="add-organizer-team-results"></div>
+          </div>
+          <div class="field"><label>Role to grant</label>
+            <select class="input" id="add-organizer-team-role">
+              <option value="co_owner">Co-Owner — full access, same as Primary Owner</option>
+              <option value="manager">Manager — day-to-day operations, no team management</option>
+            </select>
+          </div>
+          <div class="stack" id="organizer-team-list"></div>
+        </div>
+
+        <div class="card stack" id="organizer-events-section" style="display:none;">
+          <h3 style="margin:0;font-size:15px;">Events</h3>
+          <p class="small">Open an event to manage its promoters and door staff on this organizer's behalf.</p>
+          <div class="stack" id="organizer-events-admin-list"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -2022,11 +2064,17 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible, select:focus-vi
         </div>
 
         <div class="card stack" id="venue-owners-section" style="display:none;">
-          <h3 style="margin:0;font-size:15px;">Venue owner access</h3>
+          <h3 style="margin:0;font-size:15px;">Venue team access</h3>
           <p class="small">Let someone log in and see this venue's own stats — check-ins, gifts, events, ratings — never platform-wide data or another venue's data.</p>
-          <div class="field"><label>Add owner by username</label>
+          <div class="field"><label>Add by username</label>
             <input class="input" id="add-venue-owner-username" placeholder="Start typing a username..." autocomplete="off" oninput="searchVenueOwnerCandidate()">
             <div class="stack" id="add-venue-owner-results"></div>
+          </div>
+          <div class="field"><label>Role to grant</label>
+            <select class="input" id="add-venue-owner-role">
+              <option value="co_owner">Co-Owner — full access, same as Primary Owner</option>
+              <option value="manager">Manager — day-to-day operations, no team management</option>
+            </select>
           </div>
           <div class="stack" id="venue-owners-list"></div>
         </div>
@@ -10044,22 +10092,129 @@ async function renderAdminOrganizers(){
 
   const rows = data || [];
   list.innerHTML = rows.length ? rows.map(a => `
-    <div class="unrated-event-row">
+    <div class="unrated-event-row" style="cursor:pointer;" onclick="openAdminOrganizerEdit('${a.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
       <div style="flex:1;">
         <p class="small" style="color:var(--text);margin:0;">${escapeHtml(a.display_name)} (@${escapeHtml(a.profiles_public?.username || 'someone')})</p>
         <p class="small">${a.category ? escapeHtml(a.category) + ' · ' : ''}${a.is_active ? 'Active' : 'Paused'}</p>
       </div>
-      <button class="btn-sm btn-ghost" onclick="toggleOrganizerActive('${a.id}', ${!a.is_active})">${a.is_active ? 'Pause' : 'Resume'}</button>
     </div>
   `).join('') : '<p class="small">No organizers added yet.</p>';
 }
 
-window.toggleOrganizerActive = async function(id, newState){
+/* ---------- Admin: organizer detail (mirrors admin-venue-edit) ---------- */
+window.openAdminOrganizerEdit = async function(organizerId){
   if (!navigator.onLine){ toast('Connect to the internet to do this'); return; }
-  const { error } = await supabase.from('organizers').update({ is_active: newState }).eq('id', id);
-  if (error){ toast('Could not update'); return; }
-  renderAdminOrganizers();
+  const { data: org, error } = await supabase.from('organizers').select('*').eq('id', organizerId).single();
+  if (error || !org){ toast('Could not load this organizer'); return; }
+
+  state.adminEditingOrganizerId = organizerId;
+  document.getElementById('admin-organizer-edit-title').textContent = org.display_name || 'Organizer';
+  document.getElementById('ao-edit-display-name').value = org.display_name || '';
+  document.getElementById('ao-edit-category').value = org.category || '';
+  document.getElementById('ao-edit-content-category').value = org.content_category || 'nightlife';
+  document.getElementById('ao-edit-active').checked = org.is_active !== false;
+  document.getElementById('organizer-team-section').style.display = '';
+  document.getElementById('organizer-events-section').style.display = '';
+
+  loadOrganizerTeam(organizerId);
+  loadOrganizerEventsForAdmin(organizerId);
+  go('admin-organizer-edit');
 };
+
+window.saveAdminOrganizerEdit = async function(){
+  if (!navigator.onLine){ toast('Connect to the internet to do this'); return; }
+  const organizerId = state.adminEditingOrganizerId;
+  if (!organizerId) return;
+  const displayName = document.getElementById('ao-edit-display-name').value.trim();
+  if (!displayName){ toast('Add a display name first'); return; }
+
+  const { error } = await supabase.from('organizers').update({
+    display_name: displayName,
+    category: document.getElementById('ao-edit-category').value.trim() || null,
+    content_category: document.getElementById('ao-edit-content-category').value,
+    is_active: document.getElementById('ao-edit-active').checked
+  }).eq('id', organizerId);
+  if (error){ toast('Could not save'); return; }
+  toast('Saved');
+};
+
+/* Team access — mirrors the venue Co-Owner/Manager pattern exactly,
+   just pointed at organizer_roles instead of venue_roles. */
+window.searchOrganizerTeamCandidate = function(){
+  clearTimeout(searchDebounce);
+  const query = document.getElementById('add-organizer-team-username').value;
+  searchDebounce = setTimeout(() => searchUsernames(query, 'add-organizer-team-results', 'addOrganizerTeamMember'), 250);
+};
+
+window.addOrganizerTeamMember = async function(userId, username){
+  if (!navigator.onLine){ toast('Connect to the internet to do this'); return; }
+  const organizerId = state.adminEditingOrganizerId;
+  const role = document.getElementById('add-organizer-team-role').value;
+  const { error } = await supabase.from('organizer_roles').insert({ user_id: userId, organizer_id: organizerId, role });
+  document.getElementById('add-organizer-team-username').value = '';
+  document.getElementById('add-organizer-team-results').innerHTML = '';
+  if (error){
+    toast(error.code === '23505' ? `@${username} already has access to this organizer` : 'Could not add');
+    return;
+  }
+  toast(`@${username} can now manage this organizer`);
+  loadOrganizerTeam(organizerId);
+};
+
+async function loadOrganizerTeam(organizerId){
+  const list = document.getElementById('organizer-team-list');
+  if (!navigator.onLine){ list.innerHTML = '<p class="small">Connect to the internet to see this.</p>'; return; }
+  // Only the three ownership tiers — promoter/door_staff for a specific
+  // event are handled by the existing per-event promoter/door-staff
+  // screen, not here, so they're deliberately excluded from this list.
+  const { data, error } = await supabase.from('organizer_roles')
+    .select('id, user_id, role, profiles_public(username)')
+    .eq('organizer_id', organizerId)
+    .in('role', ['primary_owner', 'co_owner', 'manager']);
+  if (error){ list.innerHTML = '<p class="small">Could not load team.</p>'; return; }
+
+  const roleLabels = { primary_owner: 'Primary Owner', co_owner: 'Co-Owner', manager: 'Manager' };
+  const rows = data || [];
+  list.innerHTML = rows.length ? rows.map(o => `
+    <div class="unrated-event-row">
+      <p class="small" style="color:var(--text);margin:0;flex:1;">@${escapeHtml(o.profiles_public?.username || 'someone')} <span style="color:var(--muted);">(${roleLabels[o.role] || o.role})</span></p>
+      ${o.role === 'primary_owner' ? '' : `<button class="icon-action" title="Remove" aria-label="Remove" onclick="removeOrganizerTeamMember('${o.id}')">✕</button>`}
+    </div>
+  `).join('') : '<p class="small">Nobody has team access to this organizer yet.</p>';
+}
+
+window.removeOrganizerTeamMember = async function(id){
+  if (!navigator.onLine){ toast('Connect to the internet to do this'); return; }
+  const { error } = await supabase.from('organizer_roles').delete().eq('id', id);
+  if (error){ toast('Could not remove'); return; }
+  toast('Removed');
+  loadOrganizerTeam(state.adminEditingOrganizerId);
+};
+
+/* Events list — mirrors loadVenueEventsForAdmin exactly, just filtered
+   by organizer_id. Opening an event here reaches the exact same editor
+   an organizer sees themselves, including "Manage promoter & door
+   staff" — no separate door-staff system needed for admin, just access
+   to the one that already exists. */
+async function loadOrganizerEventsForAdmin(organizerId){
+  const list = document.getElementById('organizer-events-admin-list');
+  if (!navigator.onLine){ list.innerHTML = '<p class="small">Connect to the internet to manage events.</p>'; return; }
+  const { data, error } = await supabase.from('events')
+    .select('id, title, event_date, is_active, cover_image')
+    .eq('organizer_id', organizerId).order('event_date', { ascending: false }).limit(20);
+  if (error){ list.innerHTML = '<p class="small">Could not load events.</p>'; return; }
+
+  state.adminOrganizerEvents = data || [];
+  list.innerHTML = state.adminOrganizerEvents.length ? state.adminOrganizerEvents.map(ev => `
+    <div class="top-venue-row" style="cursor:pointer;" onclick="state.editingOrganizerId = '${organizerId}'; openEventModal('${ev.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+        ${ev.cover_image ? `<img src="${escapeHtml(ev.cover_image)}" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;">` : ''}
+        <span class="small">${escapeHtml(ev.title)}${!ev.is_active ? ' <span style="color:var(--text-faint);">(removed)</span>' : ''}</span>
+      </div>
+      <span class="small" style="color:var(--text-dim);">${new Date(ev.event_date).toLocaleDateString()}</span>
+    </div>
+  `).join('') : '<p class="small">No events yet.</p>';
+}
 
 /* ---------- Admin: manage Super Admins ---------- */
 window.searchAdminCandidate = function(){
@@ -11228,11 +11383,12 @@ window.searchVenueOwnerCandidate = function(){
 
 window.addVenueOwner = async function(userId, username){
   if (!navigator.onLine){ toast('Connect to the internet to do this'); return; }
-  const { error } = await supabase.from('venue_roles').insert({ user_id: userId, venue_id: state.editingVenueId, role: 'co_owner' });
+  const role = document.getElementById('add-venue-owner-role').value;
+  const { error } = await supabase.from('venue_roles').insert({ user_id: userId, venue_id: state.editingVenueId, role });
   document.getElementById('add-venue-owner-username').value = '';
   document.getElementById('add-venue-owner-results').innerHTML = '';
   if (error){
-    toast(error.code === '23505' ? `@${username} already has access to this venue` : 'Could not add owner');
+    toast(error.code === '23505' ? `@${username} already has access to this venue` : 'Could not add');
     return;
   }
   toast(`@${username} can now see this venue's dashboard`);
@@ -11242,16 +11398,17 @@ window.addVenueOwner = async function(userId, username){
 async function loadVenueOwners(venueId){
   const list = document.getElementById('venue-owners-list');
   if (!navigator.onLine){ list.innerHTML = '<p class="small">Connect to the internet to see this.</p>'; return; }
-  const { data, error } = await supabase.from('venue_roles').select('id, user_id, role, profiles_public(username)').eq('venue_id', venueId).in('role', ['primary_owner', 'co_owner']);
-  if (error){ list.innerHTML = '<p class="small">Could not load owners.</p>'; return; }
+  const { data, error } = await supabase.from('venue_roles').select('id, user_id, role, profiles_public(username)').eq('venue_id', venueId).in('role', ['primary_owner', 'co_owner', 'manager']);
+  if (error){ list.innerHTML = '<p class="small">Could not load team.</p>'; return; }
 
+  const roleLabels = { primary_owner: 'Primary Owner', co_owner: 'Co-Owner', manager: 'Manager' };
   const rows = data || [];
   list.innerHTML = rows.length ? rows.map(o => `
     <div class="unrated-event-row">
-      <p class="small" style="color:var(--text);margin:0;flex:1;">@${escapeHtml(o.profiles_public?.username || 'someone')}${o.role === 'primary_owner' ? ' <span style="color:var(--muted);">(Primary Owner)</span>' : ''}</p>
+      <p class="small" style="color:var(--text);margin:0;flex:1;">@${escapeHtml(o.profiles_public?.username || 'someone')} <span style="color:var(--muted);">(${roleLabels[o.role] || o.role})</span></p>
       ${o.role === 'primary_owner' ? '' : `<button class="icon-action" title="Remove" aria-label="Remove" onclick="removeVenueOwner('${o.id}')">✕</button>`}
     </div>
-  `).join('') : '<p class="small">Nobody has owner access to this venue yet.</p>';
+  `).join('') : '<p class="small">Nobody has team access to this venue yet.</p>';
 }
 
 window.removeVenueOwner = async function(id){
