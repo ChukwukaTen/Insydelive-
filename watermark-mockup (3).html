@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { background:#2a2a2a; margin:0; padding:50px; display:flex; justify-content:center; }
+  .phone { width:320px; height:640px; background:#140B22; border-radius:36px; position:relative; overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,0.5); font-family:-apple-system,sans-serif; color:#F4EEFF; }
+  .watermark { position:absolute; top:50%; left:50%; width:420px; height:420px;
+    transform:translate(-50%,-50%); pointer-events:none; }
+  .content { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; height:100%; padding:24px; text-align:center; gap:14px; }
+  .app-icon { width:64px; height:64px; border-radius:16px; }
+  h1 { font-size:24px; margin:6px 0 0; }
+  .tagline { color:#E4B94E; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin:0; }
+  .desc { font-size:13px; color:#B9AEC9; max-width:230px; margin:4px 0 14px; }
+  .btn { width:230px; padding:14px; border-radius:14px; font-weight:700; font-size:14px; }
+  .btn-primary { background:linear-gradient(135deg,#E4B94E,#B8933A); color:#1a0b33; }
+  .btn-secondary { background:rgba(244,238,255,0.08); color:#F4EEFF; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <img class="watermark" src="icon-watermark.png">
+  <div class="content">
+    <img class="app-icon" src="store-icon.png">
+    <h1>InsydeLive</h1>
+    <p class="tagline">The Nightlife Social App</p>
+    <p class="desc">See who's inside. Connect in the moment, wherever the night takes you.</p>
+    <div class="btn btn-primary">Create account</div>
+    <div class="btn btn-secondary">I already have an account</div>
+  </div>
+</div>
+</body>
+</html>
