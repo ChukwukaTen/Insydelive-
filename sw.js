@@ -1,18 +1,18 @@
 // InsydeLive Service Worker
 // Cross-browser safe: does NOT rely on Background Sync API (unsupported in Safari/iOS).
 // Actual write-replay is handled by the page via IndexedDB outbox + 'online' event (see app.js).
-
-const CACHE_VERSION = 'insydelive-v2.0.9';
+ 
+const CACHE_VERSION = 'insydelive-v2.1.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
-
+ 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
   './offline.html'
 ];
-
+ 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
@@ -20,7 +20,7 @@ self.addEventListener('install', (event) => {
       .then(() => self.skipWaiting())
   );
 });
-
+ 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -32,7 +32,7 @@ self.addEventListener('activate', (event) => {
     ).then(() => self.clients.claim())
   );
 });
-
+ 
 // Strategy:
 // - Navigation requests: network-first, fall back to cached shell, then offline.html
 // - Supabase API calls: network-only (never cache auth/data responses)
@@ -40,13 +40,13 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
-
+ 
   if (req.method !== 'GET') return; // never intercept writes; those go straight to network or fail visibly
-
+ 
   if (url.hostname.includes('supabase.co')) {
     return; // let it hit the network directly; app.js decides how to queue failures
   }
-
+ 
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req)
@@ -61,7 +61,7 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
+ 
   event.respondWith(
     caches.match(req).then((cached) => {
       const network = fetch(req)
@@ -77,12 +77,12 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
-
+ 
 // Allows the page to trigger an immediate cache refresh after a deploy
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
-
+ 
 // ------------------------------------------------------------
 // Web Push — works on Chrome/Firefox/Edge/Android everywhere,
 // and on iOS Safari 16.4+ once the app is installed to the home screen.
@@ -96,7 +96,7 @@ self.addEventListener('message', (event) => {
 self.addEventListener('push', (event) => {
   let payload = { title: 'InsydeLive', body: '', data: {} };
   try { payload = event.data ? event.data.json() : payload; } catch (e) { /* non-JSON payload, use default */ }
-
+ 
   const options = {
     body: payload.body || '',
     icon: 'icons/icon-192.png',
@@ -106,7 +106,7 @@ self.addEventListener('push', (event) => {
   };
   event.waitUntil(self.registration.showNotification(payload.title || 'InsydeLive', options));
 });
-
+ 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const data = event.notification.data || {};
