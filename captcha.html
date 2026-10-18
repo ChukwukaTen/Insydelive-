@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>InsydeLive – Quick security check</title>
+<!--
+  InsydeLive security check page (v2.4.5, 16-18 Oct 2026).
+  Used ONLY by the InsydeLive Android and iPhone apps: they open this page in a small built-in browser panel,
+  because Cloudflare Turnstile only runs on a real https address. The page runs the check and hands the one-time
+  token back to the app, then the app closes the panel. The website runs the same check inline instead.
+  It never sees passwords or account details.
+-->
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #140B22; color: #F4F1FA;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  main { min-height: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 14px; padding: 28px 20px calc(env(safe-area-inset-bottom, 0px) + 28px); text-align: center; }
+  .brand { font-size: 18px; font-weight: 700; color: #E4B94E; letter-spacing: .2px; }
+  h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  p { margin: 0; font-size: 14px; color: #B9AFCB; max-width: 320px; line-height: 1.45; }
+  .spinner { width: 26px; height: 26px; border-radius: 50%; border: 3px solid rgba(228,185,78,.25); border-top-color: #E4B94E;
+    animation: spin .9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #slot { min-height: 70px; display: flex; align-items: center; justify-content: center; }
+  .done .spinner { display: none; }
+  button { margin-top: 6px; background: transparent; color: #B9AFCB; border: 1px solid #3A2E52; border-radius: 999px;
+    padding: 10px 18px; font-size: 14px; }
+</style>
+</head>
+<body>
+<main id="main">
+  <div class="brand">⚡ InsydeLive</div>
+  <h1>Quick security check</h1>
+  <div class="spinner" aria-hidden="true"></div>
+  <p id="msg">Checking you're a real person. This usually takes a second.</p>
+  <div id="slot"></div>
+  <button id="retry" type="button" hidden onclick="location.reload()">Try again</button>
+</main>
+<script>
+(function () {
+  var SITE_KEY = '0x4AAAAAAFUpSUDUZpkSmWwU';   // public site key, the same one the website uses
+  var sent = false;
+
+  // Hand a result to the app. iPhone: WKWebView message handler. Android: JavaScript interface.
+  function send(obj) {
+    if (sent) return;
+    sent = true;
+    var json = JSON.stringify(obj);
+    try {
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.insydeCaptcha) {
+        window.webkit.messageHandlers.insydeCaptcha.postMessage(json);
+        return;
+      }
+    } catch (e) {}
+    try {
+      if (window.InsydeCaptchaBridge && typeof window.InsydeCaptchaBridge.post === 'function') {
+        window.InsydeCaptchaBridge.post(json);
+        return;
+      }
+    } catch (e) {}
+    // Opened in a normal browser by mistake: nothing to hand the token to.
+    document.getElementById('msg').textContent = 'This page is only used inside the InsydeLive app.';
+  }
+
+  function fail(code) {
+    document.getElementById('main').className = 'done';
+    document.getElementById('msg').textContent = "The check didn't complete. Check your connection and try again.";
+    document.getElementById('retry').hidden = false;
+    sent = false;
+    send({ error: String(code || 'failed') });
+    sent = false;   // allow a retry from this page to send again
+  }
+
+  window.onTurnstileLoad = function () {
+    try {
+      window.turnstile.render('#slot', {
+        sitekey: SITE_KEY,
+        theme: 'dark',
+        appearance: 'interaction-only',
+        callback: function (token) {
+          document.getElementById('main').className = 'done';
+          document.getElementById('msg').textContent = 'Done.';
+          send({ token: token });
+        },
+        'before-interactive-callback': function () {
+          document.getElementById('main').className = 'done';   // hide the spinner while waiting for the tap
+          document.getElementById('msg').textContent = 'Please tap the box below to continue.';
+        },
+        'error-callback': function (code) { fail(code); return true; },
+        'timeout-callback': function () { fail('timeout'); },
+        'expired-callback': function () { fail('expired'); }
+      });
+    } catch (e) { fail('render'); }
+  };
+
+  var s = document.createElement('script');
+  s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad';
+  s.async = true;
+  s.onerror = function () { fail('load'); };
+  document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>
